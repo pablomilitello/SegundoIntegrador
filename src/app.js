@@ -10,6 +10,7 @@ import ProductManager from '../src/Dao/ProductManagerMongo.js';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import registerRouter from './routes/register.router.js';
+import sessionsRouter from './routes/sessions.router.js';
 import mongoStore from 'connect-mongo';
 import passport from 'passport';
 import './passport/passportStrategies.js';
@@ -52,6 +53,7 @@ app.use(passport.session());
 //Routes
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
+app.use('/api/sessions', sessionsRouter);
 app.use('/views', viewsRouter);
 app.use('/register', registerRouter);
 

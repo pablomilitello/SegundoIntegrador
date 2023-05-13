@@ -4,8 +4,12 @@ import { Strategy as GithubStrategy } from 'passport-github2';
 import { userModel } from '../db/models/users.model.js';
 import { compareData, hashData } from '../utils.js';
 import UsersManager from '../Dao/UsersManagerMongo.js';
+import CartManager from '../Dao/CartManagerMongo.js';
 
 const usersManager = new UsersManager();
+const cartManager = new CartManager();
+
+const ADMIN_EMAIL = 'adminCoder@coder.com';
 
 //Local Strategy
 passport.use(
@@ -42,7 +46,11 @@ passport.use(
         return done(null, false);
       }
       const hashPassword = await hashData(password);
-      const newUser = { ...req.body, password: hashPassword };
+      const newCart = await cartManager.addCarts();
+      const newUser = { ...req.body, password: hashPassword, cart: newCart.id };
+      if (email === ADMIN_EMAIL) {
+        newUser.role = 'admin';
+      }
       const newUserDB = await userModel.create(newUser);
       done(null, newUserDB);
     }
@@ -65,10 +73,12 @@ passport.use(
         if (userDB) {
           return done(null, userDB);
         }
+        const newCart = await cartManager.addCarts();
         const newUser = {
           firstName: profile._json.name.split(' ')[0],
           lastName: profile._json.name.split(' ')[1] || '',
           email,
+          cart: newCart.id,
         };
         const newUserDB = await userModel.create(newUser);
         done(null, newUserDB);
